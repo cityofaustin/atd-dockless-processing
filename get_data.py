@@ -1,3 +1,6 @@
+'''
+Download new data from an MDS provider and load it to db.
+'''
 from datetime import datetime
 import pytz
 import logging
