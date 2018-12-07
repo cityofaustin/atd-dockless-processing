@@ -186,10 +186,10 @@ def main():
         data = parse_routes(data)
 
         data = drop_dupes(data)
-
-        data = [{key: row[key] for key in config.FIELDNAMES} for row in data]
-
-        data = floats_to_iso(data, config.TIME_FIELDS)
+        
+        data = [{field['name']: row[field['name']] for field in config.FIELDS if field.get('upload_mds') } for row in data]
+        
+        data = floats_to_iso(data, [ field['name'] for field in config.FIELDS if field.get('datetime') ] )
 
         if data:
             results = post_data(pgrest, data)
@@ -202,6 +202,6 @@ def main():
 if __name__ == "__main__":
     import logging
 
-    # logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
 
     main()
