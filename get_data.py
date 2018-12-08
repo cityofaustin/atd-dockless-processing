@@ -8,8 +8,8 @@ import pdb
 
 from mds_provider_client import *
 import requests
-from tdutils import datautil, argutil
 from pypgrest import Postgrest
+from tdutils import argutil
 
 from config import secrets
 from config import config
@@ -107,23 +107,6 @@ def floats_to_iso(data, keys):
     return data
 
 
-def min_max(trips):
-    min_ = 9_999_999_999_000
-    max_ = 0
-
-    for i, trip in enumerate(trips):
-        s = to_iso(trip["start_time"])
-        e = to_iso(trip["end_time"])
-        print("TRIP START {} END {}".format(s, e))
-        if trip["start_time"] < min_:
-            min_ = trip["start_time"]
-
-        if trip["end_time"] > max_:
-            max_ = trip["end_time"]
-
-    return min_, max_
-
-
 def drop_dupes(trips, key="trip_id"):
     ids = []
     new_trips = []
@@ -181,11 +164,8 @@ def main():
     total = 0
 
     for i in range(start, end, interval):
-
         data = get_data(client, i, interval, cfg["paging"])
-
-        min_max(data)
-
+        
         data = parse_routes(data)
 
         data = drop_dupes(data)

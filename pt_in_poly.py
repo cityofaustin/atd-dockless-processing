@@ -16,8 +16,6 @@ from config import config
 
 
 def main():
-    logging.getLogger(__name__)
-
     def split_trips(data, fields):
         """
         Split trip into separate rows (one for trip start and one fore trip end)
@@ -200,7 +198,6 @@ def main():
             "offset" : offset
         }
 
-        print('get data')
         trips = pgrest.select(params)
 
         if not trips:
@@ -228,5 +225,4 @@ def main():
     return total
 
 if __name__ == "__main__":
-    logging.basicConfig(filename="pt_in_poly.log", level=logging.DEBUG)
     results = main()
