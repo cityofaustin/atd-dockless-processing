@@ -82,7 +82,7 @@ def main():
             null_val=None
         ):
         """
-        Get id property of polygon that intersects input point. Assumes input polygons
+        Get property of polygon that intersects input point. Assumes input polygons
         do not overlap.
     
         points: list of dicts with shapely piont geometries
