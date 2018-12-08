@@ -85,7 +85,7 @@ def main():
         Get property of polygon that intersects input point. Assumes input polygons
         do not overlap.
     
-        points: list of dicts with shapely piont geometries
+        points: list of dicts with shapely point geometries
         
         polys: geojson polygon feature collection
         
@@ -95,11 +95,11 @@ def main():
         feature_property_key: the property name of the intersecting polygon that will
             be assigned to intersecting point(s)
 
-        geom_key: the name of the feature proerty which contains the geomerty of the
+        geom_key: the name of the feature proerty which contains the geometry of the
             feature. Applies to both input points and polygons
 
-        null_val: the value which will be assigned to `<row_property_key>` in no
-            intersecting polyon is found.
+        null_val: the value which will be assigned to `<row_property_key>` if no
+            intersecting polygon is found.
 
         Returns points with updated <row_property_key>
         """
