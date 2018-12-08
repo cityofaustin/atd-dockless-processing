@@ -1,0 +1,9 @@
+-e git://github.com/cityofaustin/mds-provider-client.git@dev#egg=mds_provider_client
+arrow
+pypgrest
+pytz
+requests
+rtree
+shapely
+-e git://github.com/cityofaustin/transportation-data-utils.git@master#egg=tdutils
+wheel

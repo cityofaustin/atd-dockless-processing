@@ -11,6 +11,7 @@ from rtree import index
 from shapely.geometry import shape, point
 from pypgrest import Postgrest
 
+import _setpath
 from config import secrets
 from config import config
 
