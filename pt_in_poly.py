@@ -194,7 +194,8 @@ def main():
     # move working directory to script location to
     # ensure relative paths work (in case script
     # is run by external launcher)
-    os.chdir(os.path.dirname(__file__))
+    if os.path.dirname(__file__):
+        os.chdir(os.path.dirname(__file__))
 
     grid = read_json(config.GRID_GEOJSON)
     districts = read_json(config.DISTRICTS_GEOJSON)
