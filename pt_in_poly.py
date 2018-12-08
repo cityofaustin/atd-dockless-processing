@@ -205,7 +205,7 @@ def main():
     pgrest = Postgrest(secrets.PG["url"], auth=secrets.PG["token"])
 
     while True:    
-        # loop until all db no longer yields trips with null poly attributes
+        # loop until request no longer yields trips
 
         params = {
             "select" : "trip_id,provider_id,start_latitude,start_longitude,end_latitude,end_longitude",
