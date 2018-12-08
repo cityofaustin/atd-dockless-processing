@@ -3,6 +3,7 @@ Download trips from db, extract attributes from overlapping poly, update records
 '''
 import logging
 import json
+import os
 import pdb
 import time
 
@@ -181,28 +182,32 @@ def main():
         "trip_end_x_field": "end_longitude",
     }
 
+    # move working directory to script location to
+    # ensure relative paths work (in case script
+    # is run by external launcher)
+    os.chdir(os.path.dirname(__file__))
+
     grid = read_json(config.GRID_GEOJSON)
     districts = read_json(config.DISTRICTS_GEOJSON)
 
-    interval = 10000 # num of records that will be processed per request
-    offset = 0
+    interval = 5000 # num of records that will be processed per request
     total = 0
 
     pgrest = Postgrest(secrets.PG["url"], auth=secrets.PG["token"])
 
     while True:    
+        # loop until all db no longer yields trips with null poly attributes
 
         params = {
             "select" : "trip_id,provider_id,start_latitude,start_longitude,end_latitude,end_longitude",
             "council_district_start" : "is.null",
-            "limit" : interval,
-            "offset" : offset
+            "limit" : interval
         }
 
         trips = pgrest.select(params)
 
         if not trips:
-            logging.info('No new records to process.')
+            logging.info('All records processed.')
             break
 
         trips = split_trips(trips, field_map)
@@ -220,8 +225,6 @@ def main():
         post_trips(pgrest, trips)
 
         total += len(trips)
-
-        offset += interval
 
     return total
 
