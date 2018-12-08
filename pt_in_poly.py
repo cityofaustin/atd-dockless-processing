@@ -22,7 +22,6 @@ def main():
         """
         Split trip into separate rows (one for trip start and one fore trip end)
         """
-        #todo: use two list comprehensions
         split = []
         for row in data:
             new_row = {
@@ -53,7 +52,6 @@ def main():
         """
         Create shapely geometry from list of dicts
         """
-        #TODO list comprehension
         for row in data:
 
             if row["x"] and row["y"]:
@@ -84,15 +82,26 @@ def main():
             null_val=None
         ):
         """
-        Get properties of polygon that contains input point. Assumes polygons
+        Get id property of polygon that intersects input point. Assumes input polygons
         do not overlap.
-
-        points: list of dicts with shapely geometries
+    
+        points: list of dicts with shapely piont geometries
+        
         polys: geojson polygon feature collection
+        
+        row_property_key: the property name of the input point that will be assigned a
+            value from intersecting the polygon 
+        
+        feature_property_key: the property name of the intersecting polygon that will
+            be assigned to intersecting point(s)
 
-        Returns points with polygon properties specified in key_map.
-            Assigns property=None to points that are missing geometries or do not
-            intersect with polygon
+        geom_key: the name of the feature proerty which contains the geomerty of the
+            feature. Applies to both input points and polygons
+
+        null_val: the value which will be assigned to `<row_property_key>` in no
+            intersecting polyon is found.
+
+        Returns points with updated <row_property_key>
         """
         start_time = time.time()
         count = 0
