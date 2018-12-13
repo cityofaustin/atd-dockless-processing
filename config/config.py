@@ -115,6 +115,6 @@ FIELDS = [
     },
 ]
 
-GRID_GEOJSON = "data/hex1000.json"
+GRID_GEOJSON = "data/hex500.json"
 
 DISTRICTS_GEOJSON = "data/council_districts_simplified.json"
