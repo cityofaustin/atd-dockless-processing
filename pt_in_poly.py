@@ -151,25 +151,24 @@ def main():
             grid_id = trip.get("cell_id")
             district = trip.get("council_district")
 
-            if grid_id:
-                if trip_type == "start":
-                    current_data = {
-                        "orig_cell_id": grid_id,
-                        "council_district_start" : district
-                    }
+            if trip_type == "start":
+                current_data = {
+                    "orig_cell_id": grid_id,
+                    "council_district_start" : district
+                }
 
-                elif trip_type == "end":
-                    current_data = {
-                        "dest_cell_id": grid_id,
-                        "council_district_end" : district
-                    }
+            elif trip_type == "end":
+                current_data = {
+                    "dest_cell_id": grid_id,
+                    "council_district_end" : district
+                }
 
-                if trip_id in new_trips:
-                    new_trips[trip_id].update(current_data)
-                
-                else:
-                    new_trips[trip_id] = current_data
-                    new_trips[trip_id].update(**trip)
+            if trip_id in new_trips:
+                new_trips[trip_id].update(current_data)
+            
+            else:
+                new_trips[trip_id] = current_data
+                new_trips[trip_id].update(**trip)
 
         return [new_trips[trip] for trip in new_trips.keys()]
 
