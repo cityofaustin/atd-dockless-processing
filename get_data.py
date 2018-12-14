@@ -34,7 +34,10 @@ def most_recent(client, provider_id, key="end_time"):
         }
     )
 
-    return results[0].get(key)
+    if results:
+        return results[0].get(key)
+    else:
+        return "2018-12-01T00:00:00"
 
 
 def cli_args():
@@ -66,11 +69,18 @@ def get_coords(feature):
     if feature["geometry"]["coordinates"]:
         return feature["geometry"]["coordinates"]
     else:
+        # some provider data has an empty coordinates element
         return [None, None]
 
 
 def parse_routes(trips):
     for trip in trips:
+        if not trip.get("route"):
+            # some provider data is missing a route element
+            trip["start_longitude"], trip["start_latitude"] = [0,0]
+            trip["end_longitude"], trip["end_latitude"] = [0, 0]
+            continue
+
         trip["start_longitude"], trip["start_latitude"] = get_coords(
             trip["route"]["features"][0]
         )
@@ -123,7 +133,10 @@ def drop_dupes(trips, key="trip_id"):
 
 def post_data(client, data):
     print("Post {} trips...".format(len(data)))
-    return client.upsert(data)
+    
+    client.upsert(data)
+    
+    return data
 
 
 def main():
@@ -164,20 +177,24 @@ def main():
     total = 0
 
     for i in range(start, end, interval):
+
         data = get_data(client, i, interval, cfg["paging"])
         
-        data = parse_routes(data)
-
-        data = drop_dupes(data)
-        
-        data = [{field['name']: row[field['name']] for field in config.FIELDS if field.get('upload_mds') } for row in data]
-        
-        data = floats_to_iso(data, [ field['name'] for field in config.FIELDS if field.get('datetime') ] )
-
         if data:
-            results = post_data(pgrest, data)
+            data = parse_routes(data)
 
-        total += len(data)
+            data = drop_dupes(data)
+            
+            data = [{field['name']: row[field['name']] for field in config.FIELDS if field.get('upload_mds') } for row in data]
+            
+            data = floats_to_iso(data, [ field['name'] for field in config.FIELDS if field.get('datetime') ] )
+
+            post_data(pgrest, data)
+
+            total += len(data)
+
+        else:
+            break
 
     return total
 
