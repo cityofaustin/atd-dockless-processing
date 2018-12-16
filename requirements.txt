@@ -1,5 +1,4 @@
 git+https://github.com/cityofaustin/mds-provider-client.git@dev#egg=mds_provider_client
-git+https://github.com/cityofaustin/transportation-data-utils.git@master#egg=tdutils
 arrow
 pypgrest
 pytz
@@ -7,5 +6,5 @@ pyyaml
 requests
 rtree
 shapely
-tdutils
+tdutils==0.0.15
 wheel
