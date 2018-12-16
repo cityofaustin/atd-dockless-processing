@@ -1,6 +1,5 @@
-# appends parent directory to path
-# used to just append '..' to path, but that breaks when
-# script is imoported by an external package
+# appends parent directory to path so that script can be imported an
+# external package (e.g., launch.py)
 import sys
 import os
 

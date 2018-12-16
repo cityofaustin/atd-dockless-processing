@@ -3,7 +3,9 @@ git+https://github.com/cityofaustin/transportation-data-utils.git@master#egg=tdu
 arrow
 pypgrest
 pytz
+pyyaml
 requests
 rtree
 shapely
+tdutils
 wheel

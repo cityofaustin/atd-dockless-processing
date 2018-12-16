@@ -6,6 +6,7 @@ import pytz
 import logging
 import pdb
 
+import _setpath
 from mds_provider_client import *
 import requests
 from pypgrest import Postgrest
