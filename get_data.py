@@ -195,7 +195,7 @@ def main():
             total += len(data)
 
         else:
-            break
+            continue
 
     return total
 
