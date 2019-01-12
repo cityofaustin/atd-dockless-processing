@@ -82,6 +82,12 @@ def parse_routes(trips):
             trip["end_longitude"], trip["end_latitude"] = [0, 0]
             continue
 
+        if not trip["route"].get("features"):
+            # some provider data has an empty route element
+            trip["start_longitude"], trip["start_latitude"] = [0,0]
+            trip["end_longitude"], trip["end_latitude"] = [0, 0]
+            continue
+
         trip["start_longitude"], trip["start_latitude"] = get_coords(
             trip["route"]["features"][0]
         )
@@ -168,7 +174,9 @@ def main():
         # mills to unix
         start, end, interval = int(start * 1000), int(end * 1000), int(interval * 1000)
 
-    if not cfg["client_params"].get("token"):
+    auth_type = cfg["client_params"].get('auth_type')
+
+    if not cfg["client_params"].get("token") and auth_type.lower() != 'httpbasicauth':
         auth_info = cfg.get("oauth")
         url = auth_info.pop("url")
         cfg["client_params"]["token"] = get_token(url, auth_info)
@@ -180,8 +188,9 @@ def main():
     for i in range(start, end, interval):
 
         data = get_data(client, i, interval, cfg["paging"])
-        
+
         if data:
+
             data = parse_routes(data)
 
             data = drop_dupes(data)
