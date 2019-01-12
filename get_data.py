@@ -1,6 +1,6 @@
-'''
+"""
 Download new data from an MDS provider and load it to db.
-'''
+"""
 from datetime import datetime
 import pytz
 import logging
@@ -59,8 +59,7 @@ def cli_args():
 def get_data(client, end_time, interval, paging):
 
     data = client.get_trips(
-        start_time=end_time - interval,
-        end_time=end_time, paging=paging
+        start_time=end_time - interval, end_time=end_time, paging=paging
     )
 
     return data
@@ -78,13 +77,13 @@ def parse_routes(trips):
     for trip in trips:
         if not trip.get("route"):
             # some provider data is missing a route element
-            trip["start_longitude"], trip["start_latitude"] = [0,0]
+            trip["start_longitude"], trip["start_latitude"] = [0, 0]
             trip["end_longitude"], trip["end_latitude"] = [0, 0]
             continue
 
         if not trip["route"].get("features"):
             # some provider data has an empty route element
-            trip["start_longitude"], trip["start_latitude"] = [0,0]
+            trip["start_longitude"], trip["start_latitude"] = [0, 0]
             trip["end_longitude"], trip["end_latitude"] = [0, 0]
             continue
 
@@ -140,9 +139,9 @@ def drop_dupes(trips, key="trip_id"):
 
 def post_data(client, data):
     print("Post {} trips...".format(len(data)))
-    
+
     client.upsert(data)
-    
+
     return data
 
 
@@ -174,9 +173,9 @@ def main():
         # mills to unix
         start, end, interval = int(start * 1000), int(end * 1000), int(interval * 1000)
 
-    auth_type = cfg["client_params"].get('auth_type')
+    auth_type = cfg["client_params"].get("auth_type")
 
-    if not cfg["client_params"].get("token") and auth_type.lower() != 'httpbasicauth':
+    if not cfg["client_params"].get("token") and auth_type.lower() != "httpbasicauth":
         auth_info = cfg.get("oauth")
         url = auth_info.pop("url")
         cfg["client_params"]["token"] = get_token(url, auth_info)
@@ -194,10 +193,20 @@ def main():
             data = parse_routes(data)
 
             data = drop_dupes(data)
-            
-            data = [{field['name']: row[field['name']] for field in config.FIELDS if field.get('upload_mds') } for row in data]
-            
-            data = floats_to_iso(data, [ field['name'] for field in config.FIELDS if field.get('datetime') ] )
+
+            data = [
+                {
+                    field["name"]: row[field["name"]]
+                    for field in config.FIELDS
+                    if field.get("upload_mds")
+                }
+                for row in data
+            ]
+
+            data = floats_to_iso(
+                data,
+                [field["name"] for field in config.FIELDS if field.get("datetime")],
+            )
 
             post_data(pgrest, data)
 
