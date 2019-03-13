@@ -192,10 +192,7 @@ def main():
 
     auth_type = cfg.get("auth_type")
 
-    if auth_type.lower() == "httpbasicauth":
-        print("this is not needed")
-
-    elif not cfg.get("token") and auth_type.lower() != "httpbasicauth":
+    if not cfg.get("token") and auth_type.lower() != "httpbasicauth":
         token_res = get_token(cfg["auth_url"], cfg["auth_data"])
         cfg["token"] = token_res[cfg["auth_token_res_key"]]
 
