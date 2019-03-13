@@ -16,10 +16,27 @@ from config import secrets
 from config import config
 
 
+def build_client_params(
+    cfg,
+    keys=[
+        "auth_type",
+        "delay",
+        "headers",
+        "url",
+        "timeout",
+        "token",
+        "user",
+        "password",
+    ],
+):
+    # package config elems that need to be passed to mds_provider_client
+    return {key: cfg[key] for key in keys if key in cfg}
+
+
 def get_token(url, data):
     res = requests.post(url, data=data)
     res.raise_for_status()
-    return res.json()["access_token"]
+    return res.json()
 
 
 def most_recent(client, provider_id, key="end_time"):
@@ -169,24 +186,30 @@ def main():
 
     interval = cfg["interval"]
 
-    if cfg.pop("time_format") == "mills":
+    if cfg.get("time_format") == "mills":
         # mills to unix
         start, end, interval = int(start * 1000), int(end * 1000), int(interval * 1000)
 
-    auth_type = cfg["client_params"].get("auth_type")
+    auth_type = cfg.get("auth_type")
 
-    if not cfg["client_params"].get("token") and auth_type.lower() != "httpbasicauth":
-        auth_info = cfg.get("oauth")
-        url = auth_info.pop("url")
-        cfg["client_params"]["token"] = get_token(url, auth_info)
+    if auth_type.lower() == "httpbasicauth":
+        print("this is not needed")
 
-    client = ProviderClient(**cfg["client_params"])
+    elif not cfg.get("token") and auth_type.lower() != "httpbasicauth":
+        token_res = get_token(cfg["auth_url"], cfg["auth_data"])
+        cfg["token"] = token_res[cfg["auth_token_res_key"]]
+
+    client_params = build_client_params(cfg)
+
+    client = ProviderClient(**client_params)
 
     total = 0
 
     for i in range(start, end, interval):
 
         data = get_data(client, i, interval, cfg["paging"])
+
+        print(start)
 
         if data:
 
