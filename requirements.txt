@@ -1,4 +1,4 @@
-git+https://github.com/cityofaustin/mds-provider-client.git@master#egg=mds_provider_client0.1.3
+git+https://github.com/cityofaustin/mds-provider-client.git@master#egg=mds_provider_client0.1.4
 arrow
 pypgrest
 pytz
