@@ -174,11 +174,13 @@ def main():
 
     start = args.start
     end = args.end
+    offset = cfg["time_offset_seconds"]
 
     if not start:
-        # use the most recent record as the start date
+        # use the most recent record as the start date (minus the offset)
         start = most_recent(pgrest, cfg["provider_id"])
         start = to_unix(start)
+        start = start - offset
 
     if not end:
         # use current time as the end date
