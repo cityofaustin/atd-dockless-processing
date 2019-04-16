@@ -210,7 +210,7 @@ def main():
 
         params = {
             "select" : "trip_id,provider_id,start_latitude,start_longitude,end_latitude,end_longitude",
-            # "council_district_start" : "is.null",
+            "census_geoid_start" : "is.null", # assume if census geoid is null the record has not been processed
             "limit" : interval
         }
 
