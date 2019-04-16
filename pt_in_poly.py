@@ -148,18 +148,19 @@ def main():
         for trip in trips:
             trip_id = trip[id_field]
             trip_type = trip.get("type")
-            grid_id = trip.get("cell_id")
+
+            geoid = trip.get("census_geoid")
             district = trip.get("council_district")
 
             if trip_type == "start":
                 current_data = {
-                    "orig_cell_id": grid_id,
+                    "census_geoid_start" : geoid,
                     "council_district_start" : district
                 }
 
             elif trip_type == "end":
                 current_data = {
-                    "dest_cell_id": grid_id,
+                    "census_geoid_end" : geoid,
                     "council_district_end" : district
                 }
 
@@ -196,8 +197,8 @@ def main():
     if os.path.dirname(__file__):
         os.chdir(os.path.dirname(__file__))
 
-    grid = read_json(config.GRID_GEOJSON)
     districts = read_json(config.DISTRICTS_GEOJSON)
+    census_tracts = read_json(config.CENSUS_TRACTS_GEOJSON)
 
     interval = 5000 # num of records that will be processed per request
     total = 0
@@ -209,7 +210,7 @@ def main():
 
         params = {
             "select" : "trip_id,provider_id,start_latitude,start_longitude,end_latitude,end_longitude",
-            "council_district_start" : "is.null",
+            # "council_district_start" : "is.null",
             "limit" : interval
         }
 
@@ -223,7 +224,7 @@ def main():
 
         trips = create_points(trips)
 
-        trips = point_in_poly(points=trips, polys=grid, null_val="OUT_OF_BOUNDS")
+        trips = point_in_poly(points=trips, polys=census_tracts, row_property_key="census_geoid", feature_property_key="GEOID10", null_val="OUT_OF_BOUNDS")
 
         trips = point_in_poly(points=trips, polys=districts, row_property_key="council_district", feature_property_key="district_n", null_val=0)
         

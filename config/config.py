@@ -90,13 +90,13 @@ FIELDS = [
         "datetime": False,
     },
     {
-        "name": "orig_cell_id",
+        "name": "census_geoid_start",
         "upload_mds": False,
         "upload_postgrest": True,
         "datetime": False,
     },
     {
-        "name": "dest_cell_id",
+        "name": "census_geoid_end",
         "upload_mds": False,
         "upload_postgrest": True,
         "datetime": False,
@@ -112,9 +112,11 @@ FIELDS = [
         "upload_mds": False,
         "upload_postgrest": True,
         "datetime": False,
-    },
+    }
 ]
 
 GRID_GEOJSON = "data/hex500.json"
 
 DISTRICTS_GEOJSON = "data/council_districts_simplified.json"
+
+CENSUS_TRACTS_GEOJSON = "data/census_tracts_2010_simplified_.20pctjson.json"
