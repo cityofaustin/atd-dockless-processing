@@ -119,4 +119,4 @@ GRID_GEOJSON = "data/hex500.json"
 
 DISTRICTS_GEOJSON = "data/council_districts_simplified.json"
 
-CENSUS_TRACTS_GEOJSON = "data/census_tracts_2010_simplified_.20pct.json"
+CENSUS_TRACTS_GEOJSON = "data/census_tracts_2010_simplified_20pct.json"
