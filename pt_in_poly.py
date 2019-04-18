@@ -106,25 +106,29 @@ def main():
         start_time = time.time()
         count = 0
 
-        # create grid cell index
+        # create grid cell index of polygon *bounding boxes*
         idx = index.Index()
         for pos, feature in enumerate(polys["features"]):
             idx.insert(pos, shape(feature[geom_key]).bounds)
 
-        # find intersecting polyong
+        # find intersecting polygon
         for i, pt in enumerate(points):
             
             if pt[geom_key]:
                 
                 matched = False
 
+                # iterate through polygon *bounding boxes* that intersect with point
                 for intersect_pos in idx.intersection(pt[geom_key].coords[0]):
 
                     poly = shape(polys["features"][intersect_pos][geom_key])
                     
+                    # check if point intersects actual polygon
                     if pt[geom_key].intersects(poly):
                         pt.update( { row_property_key : polys["features"][intersect_pos]["properties"][feature_property_key] } )
                         matched = True
+
+                        # break because we assume there are no overlapping polygons
                         break
 
                 if not matched:
@@ -200,7 +204,9 @@ def main():
     districts = read_json(config.DISTRICTS_GEOJSON)
     census_tracts = read_json(config.CENSUS_TRACTS_GEOJSON)
 
-    interval = 5000 # num of records that will be processed per request
+    # num of records that will be processed per request
+    # not to exceed the postgrest db request limit, which you need to know
+    interval = 5000
     total = 0
 
     pgrest = Postgrest(secrets.PG["url"], auth=secrets.PG["token"])
@@ -213,6 +219,8 @@ def main():
             "census_geoid_start" : "is.null", # assume if census geoid is null the record has not been processed
             "limit" : interval
         }
+
+        print("get data")
 
         trips = pgrest.select(params)
 
