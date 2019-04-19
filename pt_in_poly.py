@@ -1,6 +1,6 @@
-'''
+"""
 Download trips from db, extract attributes from overlapping poly, update records in db.
-'''
+"""
 import logging
 import json
 import os
@@ -47,7 +47,6 @@ def main():
 
         return split
 
-
     def create_points(data):
         """
         Create shapely geometry from list of dicts
@@ -64,7 +63,6 @@ def main():
 
         return data
 
-
     def read_json(f):
         """
         Load (geo)JSON into memory
@@ -72,15 +70,14 @@ def main():
         with open(f, "r") as fin:
             return json.loads(fin.read())
 
-
     def point_in_poly(
-            points=None,
-            polys=None,
-            row_property_key="cell_id",
-            feature_property_key="id",
-            geom_key="geometry",
-            null_val=None
-        ):
+        points=None,
+        polys=None,
+        row_property_key="cell_id",
+        feature_property_key="id",
+        geom_key="geometry",
+        null_val=None,
+    ):
         """
         Get property of polygon that intersects input point. Assumes input polygons
         do not overlap.
@@ -106,40 +103,49 @@ def main():
         start_time = time.time()
         count = 0
 
-        # create grid cell index
+        # create grid cell index of polygon *bounding boxes*
         idx = index.Index()
         for pos, feature in enumerate(polys["features"]):
             idx.insert(pos, shape(feature[geom_key]).bounds)
 
-        # find intersecting polyong
+        # find intersecting polygon
         for i, pt in enumerate(points):
-            
+
             if pt[geom_key]:
-                
+
                 matched = False
 
+                # iterate through polygon *bounding boxes* that intersect with point
                 for intersect_pos in idx.intersection(pt[geom_key].coords[0]):
 
                     poly = shape(polys["features"][intersect_pos][geom_key])
-                    
+
+                    # check if point intersects actual polygon
                     if pt[geom_key].intersects(poly):
-                        pt.update( { row_property_key : polys["features"][intersect_pos]["properties"][feature_property_key] } )
+                        pt.update(
+                            {
+                                row_property_key: polys["features"][intersect_pos][
+                                    "properties"
+                                ][feature_property_key]
+                            }
+                        )
                         matched = True
+
+                        # break because we assume there are no overlapping polygons
                         break
 
                 if not matched:
                     #  add empty cell ID rows not contained by poly
                     count += 1
-                    pt.update({ row_property_key : null_val })
+                    pt.update({row_property_key: null_val})
             else:
                 count += 1
-                pt.update({ row_property_key : null_val })
+                pt.update({row_property_key: null_val})
 
         elapsed_time = time.time() - start_time
         print(f"{count} points outside the input poly(s)")
         print(f"{elapsed_time} seconds for point in poly")
         return points
-
 
     def merge_trips(trips, id_field="trip_id"):
         #  merge start and end trips to single trip with start and end cell
@@ -148,37 +154,36 @@ def main():
         for trip in trips:
             trip_id = trip[id_field]
             trip_type = trip.get("type")
-            grid_id = trip.get("cell_id")
+
+            geoid = trip.get("census_geoid")
             district = trip.get("council_district")
 
             if trip_type == "start":
                 current_data = {
-                    "orig_cell_id": grid_id,
-                    "council_district_start" : district
+                    "census_geoid_start": geoid,
+                    "council_district_start": district,
                 }
 
             elif trip_type == "end":
                 current_data = {
-                    "dest_cell_id": grid_id,
-                    "council_district_end" : district
+                    "census_geoid_end": geoid,
+                    "council_district_end": district,
                 }
 
             if trip_id in new_trips:
                 new_trips[trip_id].update(current_data)
-            
+
             else:
                 new_trips[trip_id] = current_data
                 new_trips[trip_id].update(**trip)
 
         return [new_trips[trip] for trip in new_trips.keys()]
 
-
     def reduce_fields(data, fieldnames):
-        return [{ key: row[key] for key in fieldnames } for row in data]
-        
+        return [{key: row[key] for key in fieldnames} for row in data]
 
     def post_trips(client, trips):
-        print('upsert!')
+        print("upsert!")
         print(len(trips))
         return client.upsert(trips)
 
@@ -196,46 +201,66 @@ def main():
     if os.path.dirname(__file__):
         os.chdir(os.path.dirname(__file__))
 
-    grid = read_json(config.GRID_GEOJSON)
     districts = read_json(config.DISTRICTS_GEOJSON)
+    census_tracts = read_json(config.CENSUS_TRACTS_GEOJSON)
 
-    interval = 5000 # num of records that will be processed per request
+    # num of records that will be processed per request
+    # not to exceed the postgrest db request limit, which you need to know
+    interval = 5000
     total = 0
 
     pgrest = Postgrest(secrets.PG["url"], auth=secrets.PG["token"])
 
-    while True:    
+    while True:
         # loop until request no longer yields trips
 
         params = {
-            "select" : "trip_id,provider_id,start_latitude,start_longitude,end_latitude,end_longitude",
-            "council_district_start" : "is.null",
-            "limit" : interval
+            "select": "trip_id,provider_id,start_latitude,start_longitude,end_latitude,end_longitude",
+            "census_geoid_start": "is.null",  # assume if census geoid is null the record has not been processed
+            "limit": interval,
         }
+
+        print("get data")
 
         trips = pgrest.select(params)
 
         if not trips:
-            logging.info('All records processed.')
+            logging.info("All records processed.")
             break
 
         trips = split_trips(trips, field_map)
 
         trips = create_points(trips)
 
-        trips = point_in_poly(points=trips, polys=grid, null_val="OUT_OF_BOUNDS")
+        trips = point_in_poly(
+            points=trips,
+            polys=census_tracts,
+            row_property_key="census_geoid",
+            feature_property_key="GEOID10",
+            null_val="OUT_OF_BOUNDS",
+        )
 
-        trips = point_in_poly(points=trips, polys=districts, row_property_key="council_district", feature_property_key="district_n", null_val=0)
-        
+        trips = point_in_poly(
+            points=trips,
+            polys=districts,
+            row_property_key="council_district",
+            feature_property_key="district_n",
+            null_val=0,
+        )
+
         trips = merge_trips(trips)
 
-        trips = reduce_fields(trips, [field['name'] for field in config.FIELDS if field.get('upload_postgrest')])
+        trips = reduce_fields(
+            trips,
+            [field["name"] for field in config.FIELDS if field.get("upload_postgrest")],
+        )
 
         post_trips(pgrest, trips)
 
         total += len(trips)
 
     return total
+
 
 if __name__ == "__main__":
     results = main()
