@@ -1,10 +1,12 @@
 git+https://github.com/cityofaustin/mds-provider-client.git@master#egg=mds_provider_client0.1.4
 arrow
+atd-args-util
+atd-jobs-util
+atd-log-util
 pypgrest
 pytz
 pyyaml
 requests
 rtree
 shapely
-tdutils==0.0.15
 wheel
