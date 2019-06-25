@@ -1,8 +1,8 @@
-git+https://github.com/cityofaustin/mds-provider-client.git@master#egg=mds_provider_client0.1.4
 arrow
 atd-args-util
 atd-jobs-util
 atd-log-util
+git+https://github.com/cityofaustin/mds-provider-client.git@master
 pypgrest
 pytz
 pyyaml
