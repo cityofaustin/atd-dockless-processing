@@ -1,5 +1,6 @@
 arrow
 atd-args-util
+atd-email-util
 atd-jobs-util
 atd-log-util
 git+https://github.com/cityofaustin/mds-provider-client.git@master
