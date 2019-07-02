@@ -7,10 +7,10 @@ import logging
 import pdb
 
 import _setpath
+import argutil
 from mds_provider_client import *
 import requests
 from pypgrest import Postgrest
-from tdutils import argutil
 
 from config import secrets
 from config import config
