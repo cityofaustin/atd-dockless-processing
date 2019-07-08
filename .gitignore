@@ -2,6 +2,7 @@
 *notes.md
 *secrets*
 .vscode/
+.idea/
 __pycache__/
 .DS_Store
 
