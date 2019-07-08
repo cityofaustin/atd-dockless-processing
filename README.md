@@ -1,4 +1,4 @@
-# transportation-dockless-processing
+# atd-dockless-processing
 
 This repository contains Python scripts for processing dockless mobility data from [MDS](https://github.com/CityOfLosAngeles/mobility-data-specification)-compliant feeds.
 
